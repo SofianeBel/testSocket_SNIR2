@@ -22,7 +22,12 @@ QList<QHostAddress> NetworkScanner::getAllNetworkAddresses()
             const auto entries = interface.addressEntries();
             for (const auto& entry : entries) {
                 if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
-                    machines.append(entry.ip());
+                    // Convertir l'adresse IP en chaîne de caractères
+                    QString ipString = entry.ip().toString();
+                    // Vérifier si l'adresse IP commence par "172.20.20"
+                    if (ipString.startsWith("172.20.20")) {
+                        machines.append(entry.ip());
+                    }
                 }
             }
         }
@@ -30,3 +35,4 @@ QList<QHostAddress> NetworkScanner::getAllNetworkAddresses()
 
     return machines;
 }
+

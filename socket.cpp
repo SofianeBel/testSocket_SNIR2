@@ -196,6 +196,9 @@ void Socket::on_pushButton_clicked() {
     qDebug() << "Fichier envoye avec succes.";
     qDebug() << "Envoye a: " << formattedTime;
     qDebug() << "Nom du fichier: " << fileNameOnly;
+
+    QMessageBox::information(this, "Transfert réussi", "Le fichier a été transféré avec succès.");
+
 }
 
 
