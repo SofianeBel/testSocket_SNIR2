@@ -68,9 +68,11 @@ void loop() {
             if (receivedData == serverPassword) {
                 isConnected = true;
                 client.println("Mot de passe correct. Vous etes autorise a effectuer des operations sur le serveur.");
+                Serial.println("C'est bon !!!");
             }
             else {
                 isConnected = false;
+                Serial.println("CHEH");
                 client.println("Mot de passe incorrect. Deconnexion en cours...");
                 client.stop();
                 Serial.println("Connexion arretee avec le client");
@@ -115,8 +117,17 @@ void loop() {
                 client.println("**ERREUR : Les donnees n'ont pas ete recues correctement**");
             }
         }
+        if (receivedData == "stop") {
+            client.println("La connexion va s'arreter !");
+            client.stop();
+            Serial.println("Connexion arretee avec le client");
+        }
     }
 }
+
+
+
+
 
 void closeFile() {
     if (file) {

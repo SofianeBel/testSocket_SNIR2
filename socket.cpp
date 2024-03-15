@@ -2,12 +2,18 @@
 #include "ui_socket.h"
 #include "networkscanner.h"
 
+/**
+ * @brief Constructeur de la classe Socket.
+ *
+ * @param parent Le widget parent.
+ */
 Socket::Socket(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::Socket),
     scanner(new NetworkScanner(this)),
     timer(new QTimer(this)),
-    socket(new QTcpSocket(this))
+    socket(new QTcpSocket(this)),
+    dialog(new PasswordDialog(this))
 {
     ui->setupUi(this);
     ui->listWidgetNetwork->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -18,8 +24,13 @@ Socket::Socket(QWidget* parent) :
     connect(socket, &QTcpSocket::connected, this, &Socket::handleConnected);
     connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred), this, &Socket::handleError);
     connect(socket, &QTcpSocket::readyRead, this, &Socket::readServerResponse);
+    if (!socket->isValid()) {
+        qDebug() << "Erreur : Le socket n'est pas valide";
+        return;
+    }
+    connect(dialog, &PasswordDialog::sendPassword, this, &Socket::sendPassword);
 
-    socket->connectToHost("172.20.20.15", 5001);
+    socket->connectToHost("172.20.20.58", 5001);
     if (!socket->waitForConnected(5000)) {
         QMessageBox::critical(this, "Erreur de connexion", "Impossible de se connecter au serveur.");
         return;
@@ -29,6 +40,9 @@ Socket::Socket(QWidget* parent) :
     IsConnected = true;
 }
 
+/**
+ * @brief Destructeur de la classe Socket.
+ */
 Socket::~Socket()
 {
     delete ui;
@@ -36,20 +50,33 @@ Socket::~Socket()
     delete timer;
 }
 
+/**
+ * @brief Méthode pour lire la réponse du serveur.
+ */
 void Socket::readServerResponse() {
+    if (!socket->isValid()) {
+        qDebug() << "Erreur : Le socket n'est pas valide";
+        return;
+    }
     QByteArray response = socket->readAll();
-    qDebug() << "Reponse du serveur: " << response;
+    qDebug() << "Réponse du serveur reçue : " << response;
 
     if (response.contains("Veuillez entrer le mot de passe :")) {
-        PasswordDialog dialog(this);
-        connect(&dialog, &PasswordDialog::sendPassword, this, &Socket::sendPassword);
-        if (dialog.exec() == QDialog::Accepted) {
-            QString password = dialog.getPassword();
-            socket->write(password.toUtf8());
+        if (dialog->exec() == QDialog::Accepted) {
+            QString password = dialog->getPassword();
+            sendPassword(password);
         }
+    }
+    else
+    {
+        qDebug() << "Mot de passe incorrect. Deconnexion en cours...";
+        socket->disconnectFromHost();
     }
 }
 
+/**
+ * @brief Méthode pour vérifier les connexions réseau.
+ */
 void Socket::checkConnections()
 {
     QList<QHostAddress> currentAddresses = scanner->getAllNetworkAddresses();
@@ -65,11 +92,19 @@ void Socket::checkConnections()
     }
 }
 
+/**
+ * @brief Méthode pour gérer la connexion au serveur.
+ */
 void Socket::handleConnected() {
     qDebug() << "Connectée!";
     IsConnected = true;
 }
 
+/**
+ * @brief Méthode pour gérer les erreurs de connexion.
+ *
+ * @param socketError Le code d'erreur du socket.
+ */
 void Socket::handleError(QAbstractSocket::SocketError socketError) {
     Q_UNUSED(socketError)
         QMessageBox::critical(this, "Erreur de connexion", "Impossible de se connecter au serveur.");
@@ -77,20 +112,28 @@ void Socket::handleError(QAbstractSocket::SocketError socketError) {
     IsConnected = false;
 }
 
+/**
+ * @brief Méthode pour envoyer le mot de passe au serveur.
+ *
+ * @param password Le mot de passe à envoyer.
+ */
 void Socket::sendPassword(const QString& password) {
+    // Envoyez le mot de passe au serveur
     socket->write(password.toUtf8());
-    if (!socket->waitForBytesWritten(5000)) {
-        QMessageBox::critical(this, "Erreur d'ecriture", "Impossible d'ecrire sur le socket.");
-        return;
-    }
-    qDebug() << "Mot de passe envoye avec succes.";
+    qDebug() << "Mot de passe envoyé avec succès.";
 }
 
+/**
+ * @brief Méthode appelée lors du clic sur le bouton "Reconnecter".
+ */
 void Socket::on_pushButtonReconnect_clicked()
 {
-    socket->connectToHost("172.20.20.15", 5001);
+    socket->connectToHost("172.20.20.58", 5001);
 }
 
+/**
+ * @brief Méthode appelée lors du clic sur le bouton "Arrêter".
+ */
 void Socket::on_pushButtonStop_clicked()
 {
     if (IsConnected) {
@@ -112,6 +155,9 @@ void Socket::on_pushButtonStop_clicked()
     }
 }
 
+/**
+ * @brief Méthode appelée lors du clic sur le bouton "Envoyer".
+ */
 void Socket::on_pushButton_clicked() {
     QString fileName = QFileDialog::getOpenFileName(this, "Open File", "", "All Files (*.*)");
     if (fileName.isEmpty()) {
@@ -196,12 +242,4 @@ void Socket::on_pushButton_clicked() {
     qDebug() << "Fichier envoye avec succes.";
     qDebug() << "Envoye a: " << formattedTime;
     qDebug() << "Nom du fichier: " << fileNameOnly;
-
-    QMessageBox::information(this, "Transfert réussi", "Le fichier a été transféré avec succès.");
-
 }
-
-
-
-
-

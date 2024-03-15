@@ -1,0 +1,60 @@
+QWidget {
+    background-color: #F5F5F5;
+    border-radius: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+QPushButton {
+    background-color: #4285F4;
+    color: white;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+QPushButton:hover {
+    background-color: #357AE8;
+}
+
+QLineEdit, QTextEdit {
+    border: 1px solid #DADCE0;
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+QLineEdit:focus, QTextEdit:focus {
+    border: 1px solid #4285F4;
+}
+
+QListWidget {
+    border: 1px solid #DADCE0;
+    border-radius: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+QListWidget::item {
+    padding: 5px;
+}
+
+QProgressBar {
+    border: 1px solid #DADCE0;
+    border-radius: 5px;
+    text-align: center;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+QProgressBar::chunk {
+    background-color: #4285F4;
+    border-radius: 5px;
+}
+
+QMessageBox {
+    border-radius: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+QFileDialog {
+    border-radius: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
